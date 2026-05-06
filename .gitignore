@@ -1,0 +1,40 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# === Virtual environment ===
+.venv/
+venv/
+
+# === Secrets ===
+.env
+.env.local
+*.key
+
+# === SQLite (generated at runtime) ===
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# === Logs (generated, but keep the folder via .gitkeep) ===
+logs/*.json
+logs/*.log
+!logs/.gitkeep
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === ElevenLabs / generated artifacts ===
+agent/prompts/history/
+*.tmp

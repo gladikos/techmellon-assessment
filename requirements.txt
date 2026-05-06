@@ -1,0 +1,20 @@
+# === Backend (FastAPI server + booking APIs) ===
+fastapi>=0.115,<0.137
+uvicorn[standard]>=0.30,<0.40
+pydantic>=2.8,<3.0
+
+# === HTTP client (calling APIs from refinement loop) ===
+httpx>=0.27,<0.30
+
+# === LLM SDKs ===
+anthropic>=0.40,<1.0
+elevenlabs>=1.10,<3.0
+
+# === Environment + config ===
+python-dotenv>=1.0,<2.0
+
+# === UI ===
+streamlit>=1.38,<2.0
+
+# === Utilities ===
+tenacity>=9.0,<10.0
