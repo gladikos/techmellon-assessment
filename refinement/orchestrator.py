@@ -142,11 +142,20 @@ def _print_scores(scores: dict[str, int], pass_: bool) -> None:
 def run_pipeline(scenario_id: str,
                  pass_threshold: int = PASS_THRESHOLD,
                  max_iterations: int = MAX_ITERATIONS,
-                 max_turns_per_scenario: int = 12) -> RunResult:
+                 max_turns_per_scenario: int = 12,
+                 event_callback=None) -> RunResult:
     """
-    Run the full refinement pipeline for one scenario. Returns a
-    RunResult with every iteration's records.
+    Run the autonomous refinement pipeline for one scenario.
+
+    If event_callback is provided, it will be called as `event_callback(event_type, payload)`
+    at significant moments. Used by the dashboard WebSocket to stream live updates.
     """
+    def emit(event_type: str, payload: dict) -> None:
+        if event_callback:
+            try:
+                event_callback(event_type, payload)
+            except Exception:
+                pass  # never let UI errors break the pipeline
     scenario = get_by_id(scenario_id)
     log_dir = _make_log_dir(scenario_id)
     print(f"Logging to: {log_dir}")
@@ -162,11 +171,23 @@ def run_pipeline(scenario_id: str,
         max_iterations=max_iterations,
     )
 
+    emit("run_started", {
+        "scenario_id": scenario_id,
+        "scenario_title": scenario.title,
+        "max_iterations": max_iterations,
+        "pass_threshold": pass_threshold,
+    })
+
     current_prompt = get_baseline_prompt()
     current_version = BASELINE_VERSION
 
     for iteration_num in range(1, max_iterations + 1):
         _print_iteration_header(iteration_num, current_version)
+        emit("iteration_started", {
+            "iteration": iteration_num,
+            "prompt_version": current_version,
+            "prompt_text": current_prompt,
+        })
 
         record = IterationRecord(
             iteration=iteration_num,
@@ -201,6 +222,9 @@ def run_pipeline(scenario_id: str,
             print(f"    ⚠️  Simulator error: {sim.error}")
         else:
             print(f"    ✓ Simulation complete ({len(sim.transcript)} turns).")
+            # Stream the transcript turns to the UI.
+        for turn in sim.transcript:
+            emit("transcript_turn", turn)
 
         # 3) Evaluate
         print("\n  → Evaluating transcript...")
@@ -219,6 +243,13 @@ def run_pipeline(scenario_id: str,
             break
 
         _print_scores(record.scores, record.overall_pass)
+        emit("evaluation_complete", {
+            "iteration": iteration_num,
+            "scores": record.scores,
+            "overall_pass": record.overall_pass,
+            "failures": [asdict(f) for f in eval_result.failures],
+            "summary": record.summary,
+        })
         if record.summary:
             print(f"\n  Summary: {record.summary}")
 
@@ -241,12 +272,22 @@ def run_pipeline(scenario_id: str,
         if eval_result.has_prompt_failures:
             print(f"\n  → {sum(1 for f in eval_result.failures if f.root_cause == 'prompt')} prompt failures — running prompt_fixer...")
             try:
+                old_version = current_version
+                old_prompt = current_prompt
                 fix: PromptFixResult = fix_prompt(current_prompt, current_version, eval_result)
                 if fix.new_prompt != current_prompt:
                     current_prompt = fix.new_prompt
                     current_version = fix.new_version
                     record.prompt_fix_summary = fix.changes_summary
                     print(f"    ✓ Prompt updated to {current_version} ({len(current_prompt)} chars).")
+                    emit("prompt_fixed", {
+                        "iteration": iteration_num,
+                        "old_version": old_version,
+                        "new_version": current_version,
+                        "old_prompt": old_prompt,
+                        "new_prompt": current_prompt,
+                        "summary": fix.changes_summary,
+                    })
                     print(f"    Summary: {fix.changes_summary[:200]}")
                 else:
                     print(f"    (Fixer chose not to change the prompt.)")
@@ -265,6 +306,12 @@ def run_pipeline(scenario_id: str,
                     print(f"    ✓ {len(cfix.patches_applied)} patch(es) applied.")
                     print(f"    Summary: {cfix.summary[:200]}")
                     print("    (FastAPI --reload will pick up changes automatically.)")
+                    emit("code_fixed", {
+                        "iteration": iteration_num,
+                        "patches_applied": len(cfix.patches_applied),
+                        "patches_rejected": len(cfix.patches_rejected),
+                        "summary": cfix.summary,
+                    })
                     time.sleep(2)  # let uvicorn finish reloading
                 else:
                     print(f"    (No patches applied; {len(cfix.patches_rejected)} rejected.)")
@@ -292,12 +339,22 @@ def run_pipeline(scenario_id: str,
         print(f"  Final scores: {last}")
     print(f"  Logs: {log_dir}")
 
+    emit("run_complete", {
+        "scenario_id": scenario_id,
+        "converged": run.converged,
+        "iterations": len(run.iterations),
+        "final_version": run.final_version,
+        "final_scores": run.iterations[-1].scores if run.iterations else {},
+        "first_scores": run.iterations[0].scores if run.iterations else {},
+    })
+
     return run
 
 def run_all_scenarios(scenario_ids: Optional[list[str]] = None,
                       pass_threshold: int = PASS_THRESHOLD,
                       max_iterations: int = MAX_ITERATIONS,
-                      max_turns_per_scenario: int = 12) -> list[RunResult]:
+                      max_turns_per_scenario: int = 12,
+                      event_callback=None) -> list[RunResult]:
     """
     Run the refinement pipeline once for each scenario in the list, or
     for ALL scenarios in scenarios.SCENARIOS if no list is given.
@@ -333,6 +390,7 @@ def run_all_scenarios(scenario_ids: Optional[list[str]] = None,
                 pass_threshold=pass_threshold,
                 max_iterations=max_iterations,
                 max_turns_per_scenario=max_turns_per_scenario,
+                event_callback=event_callback,
             )
             results.append(result)
         except Exception as e:
@@ -370,6 +428,15 @@ def run_all_scenarios(scenario_ids: Optional[list[str]] = None,
         print(f"{r.scenario_id:<28} {iters:>6} {marker:>6} {score_str:>30}")
     print("-" * 70)
     print(f"Converged: {converged_count}/{len(results)}  |  Total time: {total:.1f}s")
+
+    if event_callback:
+        try:
+            event_callback("all_complete", {
+                "total_runs": len(results),
+                "converged_count": converged_count,
+            })
+        except Exception:
+            pass
 
     return results
 
