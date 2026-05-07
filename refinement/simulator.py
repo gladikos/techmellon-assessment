@@ -101,7 +101,7 @@ def run_scenario(scenario: Scenario,
     Returns a SimulationResult with the full transcript.
     """
     result = SimulationResult(scenario_id=scenario.id)
-    conv = TextConversation()
+    conv = TextConversation(verbose=True)
 
     try:
         conv.start()

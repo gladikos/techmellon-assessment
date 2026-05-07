@@ -8,6 +8,7 @@ calls fire to our backend webhooks (no mocking).
 from __future__ import annotations
 
 import os
+from tabnanny import verbose
 import threading
 from typing import Any, Optional
 
@@ -94,22 +95,25 @@ class TextConversation:
         transcript = conv.transcript
     """
 
-    def __init__(self) -> None:
+    def __init__(self, verbose: bool = False) -> None:
         self.transcript: list[dict] = []
         self.conversation_id: Optional[str] = None
+        self.verbose = verbose
         self._agent_response_event = threading.Event()
         self._client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
         self._conversation: Optional[Conversation] = None
 
     def _on_agent_response(self, text: str) -> None:
         self.transcript.append({"role": "agent", "message": text})
+        if self.verbose:
+            print(f"\n  [AGENT] {text}", flush=True)
         self._agent_response_event.set()
 
     def _on_user_transcript(self, text: str) -> None:
-        # In text mode this fires when the SDK echoes the user message back.
-        # We already record user turns in send(), so we skip duplicates.
         if not self.transcript or self.transcript[-1].get("message") != text:
             self.transcript.append({"role": "user", "message": text})
+            if self.verbose:
+                print(f"\n  [USER]  {text}", flush=True)
 
     def start(self) -> None:
         self._conversation = Conversation(
@@ -135,6 +139,8 @@ class TextConversation:
         if self._conversation is None:
             raise RuntimeError("Call start() first")
         self.transcript.append({"role": "user", "message": text})
+        if self.verbose:
+            print(f"\n  [USER]  {text}", flush=True)
 
         # Mark how many agent messages we've seen before this turn.
         agent_messages_before = sum(
