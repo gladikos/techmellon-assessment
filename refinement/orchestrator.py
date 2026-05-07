@@ -294,16 +294,106 @@ def run_pipeline(scenario_id: str,
 
     return run
 
+def run_all_scenarios(scenario_ids: Optional[list[str]] = None,
+                      pass_threshold: int = PASS_THRESHOLD,
+                      max_iterations: int = MAX_ITERATIONS,
+                      max_turns_per_scenario: int = 12) -> list[RunResult]:
+    """
+    Run the refinement pipeline once for each scenario in the list, or
+    for ALL scenarios in scenarios.SCENARIOS if no list is given.
+
+    Each scenario gets its own independent pipeline run with its own
+    log directory. Returns a list of RunResult objects, one per scenario.
+
+    Used by:
+      - The Streamlit UI's 'Run full pipeline' button
+      - CLI: python -m refinement.orchestrator --all
+    """
+    from refinement.scenarios import SCENARIOS
+
+    if scenario_ids is None:
+        scenario_ids = [s.id for s in SCENARIOS]
+
+    print(f"\n{'#' * 70}")
+    print(f"#  RUNNING PIPELINE FOR {len(scenario_ids)} SCENARIO(S)")
+    print(f"#  {', '.join(scenario_ids)}")
+    print(f"{'#' * 70}\n")
+
+    results: list[RunResult] = []
+    overall_start = time.time()
+
+    for i, sid in enumerate(scenario_ids, 1):
+        print(f"\n{'#' * 70}")
+        print(f"#  RUN {i}/{len(scenario_ids)}: {sid}")
+        print(f"{'#' * 70}")
+        scenario_start = time.time()
+        try:
+            result = run_pipeline(
+                sid,
+                pass_threshold=pass_threshold,
+                max_iterations=max_iterations,
+                max_turns_per_scenario=max_turns_per_scenario,
+            )
+            results.append(result)
+        except Exception as e:
+            # One scenario failing should not abort the whole run.
+            print(f"\n✗ Scenario {sid} crashed: {type(e).__name__}: {e}")
+            # Build a minimal RunResult to keep the summary table coherent.
+            results.append(RunResult(
+                scenario_id=sid,
+                started_at=datetime.now().isoformat(),
+                finished_at=datetime.now().isoformat(),
+                converged=False,
+                final_version="(crashed)",
+                log_dir="",
+                pass_threshold=pass_threshold,
+                max_iterations=max_iterations,
+            ))
+        elapsed = time.time() - scenario_start
+        print(f"\n  ⏱ Scenario elapsed: {elapsed:.1f}s")
+
+    # Summary table.
+    total = time.time() - overall_start
+    print(f"\n\n{'=' * 70}")
+    print("FULL PIPELINE SUMMARY")
+    print(f"{'=' * 70}")
+    print(f"{'Scenario':<28} {'Iters':>6} {'Pass':>6} {'Final scores':>30}")
+    print("-" * 70)
+    converged_count = 0
+    for r in results:
+        iters = len(r.iterations)
+        marker = "✅" if r.converged else "❌"
+        if r.converged:
+            converged_count += 1
+        final = r.iterations[-1].scores if r.iterations else {}
+        score_str = " ".join(f"{k[0]}:{v}" for k, v in final.items())
+        print(f"{r.scenario_id:<28} {iters:>6} {marker:>6} {score_str:>30}")
+    print("-" * 70)
+    print(f"Converged: {converged_count}/{len(results)}  |  Total time: {total:.1f}s")
+
+    return results
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
-        print("Usage: python -m refinement.orchestrator <scenario_id>")
+        print("Usage:")
+        print("  python -m refinement.orchestrator <scenario_id>     # run one scenario")
+        print("  python -m refinement.orchestrator --all              # run all 10 scenarios")
+        print("  python -m refinement.orchestrator --list <id1> <id2> # run a subset")
         print("\nAvailable scenario IDs:")
         from refinement.scenarios import SCENARIOS
         for s in SCENARIOS:
             print(f"  - {s.id}")
         sys.exit(1)
 
-    scenario_id = sys.argv[1]
-    run_pipeline(scenario_id)
+    arg = sys.argv[1]
+    if arg == "--all":
+        run_all_scenarios()
+    elif arg == "--list":
+        if len(sys.argv) < 3:
+            print("--list requires at least one scenario id")
+            sys.exit(1)
+        run_all_scenarios(scenario_ids=sys.argv[2:])
+    else:
+        run_pipeline(arg)
