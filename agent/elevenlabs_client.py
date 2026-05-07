@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from tabnanny import verbose
 import threading
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import httpx
 from dotenv import load_dotenv
@@ -95,10 +95,12 @@ class TextConversation:
         transcript = conv.transcript
     """
 
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self, verbose: bool = False,
+                 on_turn: Optional[Callable[[dict], None]] = None) -> None:
         self.transcript: list[dict] = []
         self.conversation_id: Optional[str] = None
         self.verbose = verbose
+        self.on_turn = on_turn
         self._agent_response_event = threading.Event()
         self._client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
         self._conversation: Optional[Conversation] = None
@@ -107,6 +109,11 @@ class TextConversation:
         self.transcript.append({"role": "agent", "message": text})
         if self.verbose:
             print(f"\n  [AGENT] {text}", flush=True)
+        if self.on_turn:
+            try:
+                self.on_turn({"role": "agent", "message": text})
+            except Exception:
+                pass
         self._agent_response_event.set()
 
     def _on_user_transcript(self, text: str) -> None:
@@ -114,6 +121,11 @@ class TextConversation:
             self.transcript.append({"role": "user", "message": text})
             if self.verbose:
                 print(f"\n  [USER]  {text}", flush=True)
+            if self.on_turn:
+                try:
+                    self.on_turn({"role": "user", "message": text})
+                except Exception:
+                    pass
 
     def start(self) -> None:
         self._conversation = Conversation(
@@ -141,6 +153,11 @@ class TextConversation:
         self.transcript.append({"role": "user", "message": text})
         if self.verbose:
             print(f"\n  [USER]  {text}", flush=True)
+        if self.on_turn:
+            try:
+                self.on_turn({"role": "user", "message": text})
+            except Exception:
+                pass
 
         # Mark how many agent messages we've seen before this turn.
         agent_messages_before = sum(

@@ -215,16 +215,17 @@ def run_pipeline(scenario_id: str,
 
         # 2) Run simulation
         print("\n  → Running simulation...")
-        sim: SimulationResult = run_scenario(scenario, max_turns=max_turns_per_scenario)
+        sim: SimulationResult = run_scenario(scenario, max_turns=max_turns_per_scenario,
+                                              on_turn=lambda turn: emit("transcript_turn", turn))
         record.transcript = sim.transcript
         if sim.error:
             record.error = sim.error
             print(f"    ⚠️  Simulator error: {sim.error}")
         else:
             print(f"    ✓ Simulation complete ({len(sim.transcript)} turns).")
-            # Stream the transcript turns to the UI.
         for turn in sim.transcript:
-            emit("transcript_turn", turn)
+            if turn.get("role") in ("tool_call", "tool_result"):
+                emit("transcript_turn", turn)
 
         # 3) Evaluate
         print("\n  → Evaluating transcript...")

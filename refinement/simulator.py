@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass, field
+from typing import Callable, Optional
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -84,7 +85,8 @@ def _next_customer_turn(scenario: Scenario, transcript: list[dict]) -> str:
 
 def run_scenario(scenario: Scenario,
                  max_turns: int = 12,
-                 settle_seconds: float = 2.0) -> SimulationResult:
+                 settle_seconds: float = 2.0,
+                 on_turn: Optional[Callable[[dict], None]] = None) -> SimulationResult:
     """
     Run one scenario end-to-end.
 
@@ -101,7 +103,7 @@ def run_scenario(scenario: Scenario,
     Returns a SimulationResult with the full transcript.
     """
     result = SimulationResult(scenario_id=scenario.id)
-    conv = TextConversation(verbose=True)
+    conv = TextConversation(verbose=True, on_turn=on_turn)
 
     try:
         conv.start()
