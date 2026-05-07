@@ -96,6 +96,7 @@ class TextConversation:
 
     def __init__(self) -> None:
         self.transcript: list[dict] = []
+        self.conversation_id: Optional[str] = None
         self._agent_response_event = threading.Event()
         self._client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
         self._conversation: Optional[Conversation] = None
@@ -175,5 +176,69 @@ class TextConversation:
     def end(self) -> None:
         if self._conversation is not None:
             self._conversation.end_session()
-            self._conversation.wait_for_session_end()
+            self.conversation_id = self._conversation.wait_for_session_end()
             self._conversation = None
+
+def fetch_authoritative_transcript(conversation_id: str,
+                                    max_wait_seconds: float = 30.0,
+                                    poll_interval: float = 1.5) -> list[dict]:
+    """
+    Fetch the conversation's full server-side transcript from ElevenLabs
+    and return it in our flat, evaluator-friendly format.
+
+    Polls until the conversation status is 'done' (post-processing
+    complete), then translates ElevenLabs' nested transcript schema
+    into a flat list of:
+      - {"role": "agent", "message": "..."}
+      - {"role": "user", "message": "..."}
+      - {"role": "tool_call", "tool_name": "...", "params": "..."}
+      - {"role": "tool_result", "tool_name": "...", "result": "...", "is_error": bool}
+
+    This is the ground-truth transcript: it includes every tool event
+    that fired server-side, in the correct order. Use this as the
+    transcript fed to the evaluator.
+    """
+    import time as _time
+
+    # Poll until ElevenLabs finishes processing.
+    deadline = _time.time() + max_wait_seconds
+    data: dict = {}
+    while _time.time() < deadline:
+        data = _request("GET", f"/convai/conversations/{conversation_id}")
+        status = data.get("status")
+        if status == "done":
+            break
+        if status == "failed":
+            return []
+        _time.sleep(poll_interval)
+
+    # Translate ElevenLabs' transcript turns into our flat format.
+    flat: list[dict] = []
+    for turn in data.get("transcript", []):
+        role = turn.get("role")
+        message = turn.get("message")
+        tool_calls = turn.get("tool_calls") or []
+        tool_results = turn.get("tool_results") or []
+
+        # In ElevenLabs' schema, tool_calls and tool_results live in their
+        # own turns with role='agent' and message=null. Plain text turns
+        # have a non-null message and empty tool arrays.
+        if message:
+            flat.append({"role": role, "message": message})
+
+        for call in tool_calls:
+            flat.append({
+                "role": "tool_call",
+                "tool_name": call.get("tool_name", ""),
+                "params": call.get("params_as_json", ""),
+            })
+
+        for result in tool_results:
+            flat.append({
+                "role": "tool_result",
+                "tool_name": result.get("tool_name", ""),
+                "result": str(result.get("result_value", ""))[:1000],
+                "is_error": bool(result.get("is_error")),
+            })
+
+    return flat

@@ -137,8 +137,19 @@ def run_scenario(scenario: Scenario,
             conv.end()
         except Exception:
             pass
-        result.transcript = conv.transcript
 
+        # Use ElevenLabs' authoritative transcript (includes tool events).
+        # Fall back to our in-memory transcript if the fetch fails.
+        try:
+            from agent.elevenlabs_client import fetch_authoritative_transcript
+            if conv.conversation_id:
+                result.transcript = fetch_authoritative_transcript(conv.conversation_id)
+            else:
+                result.transcript = conv.transcript
+        except Exception as e:
+            result.transcript = conv.transcript
+            if not result.error:
+                result.error = f"transcript_fetch_failed: {type(e).__name__}: {e}"
     return result
 
 
@@ -154,9 +165,15 @@ if __name__ == "__main__":
 
     print(f"\n=== TRANSCRIPT ({len(result.transcript)} entries) ===\n")
     for entry in result.transcript:
-        role = entry.get("role", "?").upper()
-        msg = entry.get("message", "")
-        print(f"[{role}] {msg}\n")
+        role = entry.get("role", "?")
+        if role in ("agent", "user", "system"):
+            print(f"[{role.upper()}] {entry.get('message', '')}\n")
+        elif role == "tool_call":
+            print(f"[TOOL_CALL] {entry.get('tool_name')}({entry.get('params')})\n")
+        elif role == "tool_result":
+            err = " (ERROR)" if entry.get("is_error") else ""
+            preview = (entry.get("result") or "")[:200]
+            print(f"[TOOL_RESULT{err}] {entry.get('tool_name')} → {preview}...\n")
 
     print("=" * 50)
     print(f"Completed naturally: {result.completed}")
