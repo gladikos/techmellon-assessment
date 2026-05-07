@@ -1,0 +1,472 @@
+{
+  "simulated_conversation": [
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": "Thank you for calling Aegis Airlines. How can I help you today?",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 0,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "user",
+      "agent_metadata": null,
+      "message": "Hello, I'd like to book a flight from Athens to London Heathrow for sometime next week. I'm looking for the cheapest economy option.  My name is Maria Papadopoulou and my email is maria.p@example.com.",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 1,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": "Let me search for available flights to London Heathrow for next week!",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": {
+        "metrics": {
+          "convai_llm_service_ttf_sentence": {
+            "elapsed_time": 1.08865069411695
+          },
+          "convai_llm_service_ttfb": {
+            "elapsed_time": 0.6276003792881966
+          },
+          "convai_llm_service_tt_last_sentence": {
+            "elapsed_time": 1.0886433832347393
+          }
+        },
+        "convai_asr_provider": null,
+        "convai_tts_model": null,
+        "convai_tts_cascade": null
+      },
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 2,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [
+        {
+          "type": "webhook",
+          "request_id": "toolu_vrtx_01Vy9yGg4gpWsx2k6gEufVYo",
+          "tool_name": "search_flights",
+          "params_as_json": "{\"destination\": \"LHR\", \"date\": \"2025-01-27\", \"fare_class\": \"economy_light\"}",
+          "tool_has_been_called": false,
+          "tool_details": null
+        }
+      ],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 3,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [
+        {
+          "request_id": "toolu_vrtx_01Vy9yGg4gpWsx2k6gEufVYo",
+          "tool_name": "search_flights",
+          "result_value": "Tool Called.",
+          "is_error": false,
+          "is_blocked": false,
+          "tool_has_been_called": true,
+          "tool_latency_secs": 0.0,
+          "error_type": "",
+          "raw_error_message": "",
+          "dynamic_variable_updates": [],
+          "type": "webhook"
+        }
+      ],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 4,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [
+        {
+          "type": "webhook",
+          "request_id": "toolu_vrtx_01FT1sF625NiJq9bDB6anzrQ",
+          "tool_name": "search_flights",
+          "params_as_json": "{\"destination\": \"LHR\", \"date\": \"2025-01-28\", \"fare_class\": \"economy_light\"}",
+          "tool_has_been_called": false,
+          "tool_details": null
+        }
+      ],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 5,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [
+        {
+          "request_id": "toolu_vrtx_01FT1sF625NiJq9bDB6anzrQ",
+          "tool_name": "search_flights",
+          "result_value": "Tool Called.",
+          "is_error": false,
+          "is_blocked": false,
+          "tool_has_been_called": true,
+          "tool_latency_secs": 0.0,
+          "error_type": "",
+          "raw_error_message": "",
+          "dynamic_variable_updates": [],
+          "type": "webhook"
+        }
+      ],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 6,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": "It seems the search didn't return results.  Let me try a broader search without specifying a fare class to see all available options.",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": {
+        "metrics": {
+          "convai_llm_service_ttf_sentence": {
+            "elapsed_time": 1.4180325530469418
+          },
+          "convai_llm_service_ttfb": {
+            "elapsed_time": 0.8998013511300087
+          },
+          "convai_llm_service_tt_last_sentence": {
+            "elapsed_time": 1.9850751757621765
+          }
+        },
+        "convai_asr_provider": null,
+        "convai_tts_model": null,
+        "convai_tts_cascade": null
+      },
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 7,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [
+        {
+          "type": "webhook",
+          "request_id": "toolu_vrtx_01UgGobqtXwDdQRz77H82HXK",
+          "tool_name": "search_flights",
+          "params_as_json": "{\"destination\": \"LHR\"}",
+          "tool_has_been_called": false,
+          "tool_details": null
+        }
+      ],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 8,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": null,
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [
+        {
+          "request_id": "toolu_vrtx_01UgGobqtXwDdQRz77H82HXK",
+          "tool_name": "search_flights",
+          "result_value": "Tool Called.",
+          "is_error": false,
+          "is_blocked": false,
+          "tool_has_been_called": true,
+          "tool_latency_secs": 0.0,
+          "error_type": "",
+          "raw_error_message": "",
+          "dynamic_variable_updates": [],
+          "type": "webhook"
+        }
+      ],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 9,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": "I'm having some trouble retrieving flight results at the moment.  There seems to be a system issue on our end.  I apologize for the inconvenience.\n \nCould you please try calling our customer support line directly for assistance with booking?  You can also try again in a few moments and I'll be happy to help.  Is there anything else I can assist you with in the meantime?",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": {
+        "metrics": {
+          "convai_llm_service_ttf_sentence": {
+            "elapsed_time": 0.9078852105885744
+          },
+          "convai_llm_service_ttfb": {
+            "elapsed_time": 0.49340495467185974
+          },
+          "convai_llm_service_tt_last_sentence": {
+            "elapsed_time": 3.049858620390296
+          }
+        },
+        "convai_asr_provider": null,
+        "convai_tts_model": null,
+        "convai_tts_cascade": null
+      },
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 10,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "user",
+      "agent_metadata": null,
+      "message": "I understand. I'll try again later or call customer support.  Thank you for your help so far.",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": null,
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 11,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    },
+    {
+      "role": "agent",
+      "agent_metadata": {
+        "agent_id": "agent_4601kr0vza5veeqsmk1qx85c2rm3",
+        "branch_id": null,
+        "workflow_node_id": null,
+        "version_id": null
+      },
+      "message": "You're welcome, Maria!  I'm sorry I wasn't able to complete the booking for you today.  When you call back or try again,  just have your details ready \u2014 name, email,  and preferred travel dates \u2014 and we'll get you sorted quickly.\n \nIs there anything else I can help you with before you go?",
+      "multivoice_message": null,
+      "tool_calls": [],
+      "tool_results": [],
+      "feedback": null,
+      "llm_override": null,
+      "time_in_call_secs": 0,
+      "conversation_turn_metrics": {
+        "metrics": {
+          "convai_llm_service_ttf_sentence": {
+            "elapsed_time": 2.3732962999492884
+          },
+          "convai_llm_service_ttfb": {
+            "elapsed_time": 1.9848844930529594
+          },
+          "convai_llm_service_tt_last_sentence": {
+            "elapsed_time": 3.2612802609801292
+          }
+        },
+        "convai_asr_provider": null,
+        "convai_tts_model": null,
+        "convai_tts_cascade": null
+      },
+      "rag_retrieval_info": null,
+      "llm_usage": null,
+      "interrupted": false,
+      "original_message": null,
+      "source_medium": null,
+      "source_event_id": 12,
+      "used_static_kb_document_ids": [],
+      "file_input": null,
+      "contextual_update_info": null
+    }
+  ],
+  "analysis": {
+    "evaluation_criteria_results": {},
+    "data_collection_results": {},
+    "evaluation_criteria_results_list": [],
+    "data_collection_results_list": [],
+    "call_successful": "success",
+    "transcript_summary": "The user, Maria Papadopoulou, requested to book a cheap economy flight from Athens to London Heathrow for the following week. The agent attempted to search for flights but encountered a system issue, preventing any results from being retrieved. The agent advised the user to contact customer support directly or try again later, which the user accepted.",
+    "call_summary_title": "Flight Booking Issue",
+    "scoped": []
+  },
+  "guardrails_result": null
+}

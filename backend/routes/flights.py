@@ -22,8 +22,9 @@ Design notes:
 from __future__ import annotations
 
 from typing import Optional
+import math
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 from backend.database import get_conn
 from backend.models import FareClass, FlightResponse
@@ -35,11 +36,41 @@ router = APIRouter(prefix="/flights", tags=["flights"])
 async def search_flights(
     destination: str = Query(..., min_length=3, max_length=3, description="IATA code, e.g. CDG"),
     date: Optional[str] = Query(None, description="ISO date YYYY-MM-DD"),
-    max_price: Optional[float] = Query(None, ge=0),
-    fare_class: Optional[FareClass] = Query(None),
+    max_price: Optional[str] = Query(None, description="Maximum price in EUR"),
+    fare_class: Optional[str] = Query(None, description="Fare class"),
     limit: int = Query(20, ge=1, le=100),
 ) -> list[FlightResponse]:
-    """Search the flight catalog with optional filters."""
+    """Search the flight catalog with optional filters.
+
+    Note: optional params accept empty strings as 'missing' to be tolerant
+    of upstream callers (e.g. ElevenLabs webhook tools) that send unset
+    optional params as '' rather than omitting them entirely.
+    """
+    # Normalize: treat empty strings as missing.
+    date = date or None
+    fare_class = fare_class or None
+    max_price_value: Optional[float] = None
+    if max_price not in (None, "", "NaN", "null", "undefined"):
+        try:
+            max_price_value = float(max_price)
+            if math.isnan(max_price_value) or math.isinf(max_price_value):
+                max_price_value = None  # treat NaN/Inf as "no filter"
+            elif max_price_value < 0:
+                raise ValueError("max_price must be >= 0")
+        except ValueError:
+            raise HTTPException(400, f"Invalid max_price: {max_price!r}")
+
+    # Validate fare_class against allowed set (was a Literal type before).
+    allowed_fare_classes = {
+        "economy_light", "economy", "economy_flex", "business", "business_flex"
+    }
+    if fare_class and fare_class not in allowed_fare_classes:
+        raise HTTPException(
+            400,
+            f"Invalid fare_class: {fare_class!r}. "
+            f"Allowed: {', '.join(sorted(allowed_fare_classes))}",
+        )
+
     sql = """
         SELECT id, flight_number, origin, destination,
                departure_time, arrival_time,
@@ -51,14 +82,12 @@ async def search_flights(
     params: list = [destination.upper()]
 
     if date:
-        # Match any flight whose departure_time starts with the requested date.
-        # Stored as ISO 8601 strings, so prefix-match works correctly.
         sql += " AND departure_time LIKE ?"
         params.append(f"{date}%")
 
-    if max_price is not None:
+    if max_price_value is not None:
         sql += " AND price_eur <= ?"
-        params.append(max_price)
+        params.append(max_price_value)
 
     if fare_class:
         sql += " AND fare_class = ?"
