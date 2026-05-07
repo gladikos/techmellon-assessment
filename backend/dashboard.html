@@ -45,6 +45,28 @@
   <button id="run-one-btn" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed">
     Run This Scenario
   </button>
+  <details id="subset-details" class="relative">
+    <summary class="px-4 py-2 bg-slate-100 text-slate-700 text-sm rounded-md cursor-pointer hover:bg-slate-200 select-none">
+      Run a custom subset
+    </summary>
+    <div class="absolute left-0 top-full mt-1 z-10 bg-white border border-slate-200 rounded-lg shadow-lg p-4 min-w-[320px]">
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-3 text-sm text-slate-700">
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="book_next_to_destination" checked> book_next_to_destination</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="cheapest_within_week" checked> cheapest_within_week</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="pet_policy_inquiry" checked> pet_policy_inquiry</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="reschedule_booking" checked> reschedule_booking</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="baggage_inquiry" checked> baggage_inquiry</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="cancel_refund" checked> cancel_refund</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="seat_preference" checked> seat_preference</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="add_extra_bag" checked> add_extra_bag</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="checkin_status" checked> checkin_status</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="scenario-checkbox" value="special_assistance" checked> special_assistance</label>
+      </div>
+      <button id="run-subset-btn" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed">
+        Run Selected
+      </button>
+    </div>
+  </details>
   <button id="run-all-btn" class="px-4 py-2 bg-slate-800 text-white text-sm rounded-md hover:bg-slate-900 disabled:bg-slate-400 disabled:cursor-not-allowed">
     Run All 10
   </button>
@@ -89,11 +111,13 @@
       </div>
     </section>
 
-    <!-- Score chart -->
+    <!-- Score chart (hidden; re-enable by removing this comment)
     <section class="bg-white rounded-lg border border-slate-200 p-4">
       <h2 class="font-semibold text-slate-900 mb-3">Scores Over Iterations</h2>
       <canvas id="score-chart" height="160"></canvas>
     </section>
+    -->
+    <div style="display:none"><canvas id="score-chart"></canvas></div>
 
     <!-- Prompt diff -->
     <section class="bg-white rounded-lg border border-slate-200 flex flex-col" style="max-height: 50vh;">
@@ -121,6 +145,7 @@ const eventLog = $("event-log");
 const statusEl = $("status");
 const runOneBtn = $("run-one-btn");
 const runAllBtn = $("run-all-btn");
+const runSubsetBtn = $("run-subset-btn");
 const scenarioSelect = $("scenario-select");
 const diffSelect = $("diff-select");
 const diffView = $("diff-view");
@@ -165,6 +190,16 @@ function setStatus(text, kind = "info") {
 function setButtonsEnabled(enabled) {
   runOneBtn.disabled = !enabled;
   runAllBtn.disabled = !enabled;
+  if (enabled) {
+    updateSubsetButtonState();
+  } else {
+    runSubsetBtn.disabled = true;
+  }
+}
+
+function updateSubsetButtonState() {
+  const anyChecked = [...document.querySelectorAll('.scenario-checkbox')].some(cb => cb.checked);
+  runSubsetBtn.disabled = !anyChecked;
 }
 
 function logEvent(type, payload) {
@@ -418,12 +453,23 @@ function handleEvent(type, payload) {
   }
 }
 
+document.querySelectorAll('.scenario-checkbox').forEach(cb => {
+  cb.addEventListener('change', updateSubsetButtonState);
+});
+updateSubsetButtonState();
+
 runOneBtn.addEventListener("click", () => {
   startRun("start_one", { scenario_id: scenarioSelect.value });
 });
 
 runAllBtn.addEventListener("click", () => {
   startRun("start_all");
+});
+
+runSubsetBtn.addEventListener("click", () => {
+  const ids = [...document.querySelectorAll('.scenario-checkbox:checked')].map(cb => cb.value);
+  $("subset-details").open = false;
+  startRun("start_subset", { scenario_ids: ids });
 });
 </script>
 

@@ -73,6 +73,15 @@ async def ws_run(ws: WebSocket):
                     run_pipeline(scenario_id, event_callback=callback)
                 elif action == "start_all":
                     run_all_scenarios(event_callback=callback)
+                elif action == "start_subset":
+                    scenario_ids = msg.get("scenario_ids") or []
+                    if not scenario_ids:
+                        event_q.put({
+                            "type": "error",
+                            "payload": {"message": "start_subset requires scenario_ids"},
+                        })
+                        return
+                    run_all_scenarios(scenario_ids=scenario_ids, event_callback=callback)
                 else:
                     event_q.put({
                         "type": "error",

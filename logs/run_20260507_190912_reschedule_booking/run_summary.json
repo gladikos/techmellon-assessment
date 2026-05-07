@@ -1,0 +1,57 @@
+{
+  "scenario_id": "reschedule_booking",
+  "started_at": "2026-05-07T19:09:12.522370",
+  "finished_at": "2026-05-07T19:13:08.284586",
+  "converged": true,
+  "iterations_run": 3,
+  "max_iterations": 5,
+  "pass_threshold": 8,
+  "final_version": "v1.1",
+  "scores_by_iteration": [
+    {
+      "iteration": 1,
+      "version": "v1.0-baseline",
+      "scores": {
+        "understanding": 9,
+        "tool_use": 9,
+        "outcome": 7,
+        "conversation_quality": 8
+      },
+      "overall_pass": false
+    },
+    {
+      "iteration": 2,
+      "version": "v1.0-baseline",
+      "scores": {
+        "understanding": 9,
+        "tool_use": 6,
+        "outcome": 7,
+        "conversation_quality": 7
+      },
+      "overall_pass": false
+    },
+    {
+      "iteration": 3,
+      "version": "v1.1",
+      "scores": {
+        "understanding": 9,
+        "tool_use": 9,
+        "outcome": 8,
+        "conversation_quality": 9
+      },
+      "overall_pass": true
+    }
+  ],
+  "first_scores": {
+    "understanding": 9,
+    "tool_use": 9,
+    "outcome": 7,
+    "conversation_quality": 8
+  },
+  "final_scores": {
+    "understanding": 9,
+    "tool_use": 9,
+    "outcome": 8,
+    "conversation_quality": 9
+  }
+}
