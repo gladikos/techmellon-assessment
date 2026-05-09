@@ -4,17 +4,17 @@ Flight search routes.
 The agent's tool calls one endpoint:
 
   GET /flights/search
-       ?destination=CDG       (required)
+       ?destination=CDG       (optional, IATA code)
        &date=2026-05-12       (optional, ISO date)
        &max_price=150         (optional, EUR)
        &fare_class=economy    (optional)
+       &sort=price            (optional, 'time' or 'price'; default 'time')
 
-Returns matching flights ordered by departure time then price (cheapest first).
-Limits to 20 results to keep agent tool responses tight.
+At least one filter is recommended — omitting all returns the full catalog.
+Returns up to 20 results by default; sort by departure time (default) or price.
 
 Design notes:
-  - All filters are optional except destination (otherwise we'd return the
-    whole catalog, which is noisy for the agent).
+  - destination is now optional so callers can search by date or price alone.
   - We exclude flights with seats_available = 0 by default — the agent
     should not be offered to "find" sold-out flights.
 """
@@ -34,10 +34,12 @@ router = APIRouter(prefix="/flights", tags=["flights"])
 
 @router.get("/search", response_model=list[FlightResponse])
 async def search_flights(
-    destination: str = Query(..., min_length=3, max_length=3, description="IATA code, e.g. CDG"),
-    date: Optional[str] = Query(None, description="ISO date YYYY-MM-DD"),
+    destination: Optional[str] = Query(None, min_length=3, max_length=3, description="IATA code, e.g. CDG (optional — omit to search across all destinations)"),
+    date: Optional[str] = Query(None, description="ISO date YYYY-MM-DD (start date, inclusive)"),
+    date_to: Optional[str] = Query(None, description="ISO date YYYY-MM-DD (end date, inclusive); used with date for range queries"),
     max_price: Optional[str] = Query(None, description="Maximum price in EUR"),
     fare_class: Optional[str] = Query(None, description="Fare class"),
+    sort: str = Query("time", description="Sort order: 'time' (default) or 'price'"),
     limit: int = Query(20, ge=1, le=100),
 ) -> list[FlightResponse]:
     """Search the flight catalog with optional filters.
@@ -76,14 +78,24 @@ async def search_flights(
                departure_time, arrival_time,
                fare_class, price_eur, seats_available
         FROM flights
-        WHERE destination = ?
-          AND seats_available > 0
+        WHERE seats_available > 0
     """
-    params: list = [destination.upper()]
+    params: list = []
 
-    if date:
+    if destination:
+        sql += " AND destination = ?"
+        params.append(destination.upper())
+
+    date_to = date_to or None
+    if date and date_to:
+        sql += " AND DATE(departure_time) BETWEEN ? AND ?"
+        params.extend([date, date_to])
+    elif date:
         sql += " AND departure_time LIKE ?"
         params.append(f"{date}%")
+    elif date_to:
+        sql += " AND DATE(departure_time) <= ?"
+        params.append(date_to)
 
     if max_price_value is not None:
         sql += " AND price_eur <= ?"
@@ -93,7 +105,10 @@ async def search_flights(
         sql += " AND fare_class = ?"
         params.append(fare_class)
 
-    sql += " ORDER BY departure_time ASC, price_eur ASC LIMIT ?"
+    if sort == "price":
+        sql += " ORDER BY price_eur ASC, departure_time ASC LIMIT ?"
+    else:
+        sql += " ORDER BY departure_time ASC, price_eur ASC LIMIT ?"
     params.append(limit)
 
     with get_conn() as conn:

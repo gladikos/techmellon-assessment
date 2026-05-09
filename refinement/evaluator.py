@@ -157,25 +157,66 @@ def _extract_json(text: str) -> dict:
     """
     Pull the first {...} JSON object out of the model's reply.
     Tolerates accidental code fences or trailing prose.
+    Properly handles braces that appear inside JSON string literals.
     """
-    # If wrapped in ```...``` fences, strip them.
+    # Strategy 1: fenced ```json``` blocks.
     fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fenced:
-        return json.loads(fenced.group(1))
+        try:
+            return json.loads(fenced.group(1))
+        except json.JSONDecodeError:
+            pass  # fall through to other strategies
 
-    # Otherwise find the first balanced JSON object.
+    # Strategy 2: walk the text tracking string state, find a balanced object.
     start = text.find("{")
     if start < 0:
         raise ValueError("No JSON object found in evaluator response")
+
     depth = 0
+    in_string = False
+    escape = False
+    end_index = -1
+
     for i in range(start, len(text)):
-        if text[i] == "{":
+        ch = text[i]
+        if escape:
+            escape = False
+            continue
+        if ch == "\\":
+            escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
             depth += 1
-        elif text[i] == "}":
+        elif ch == "}":
             depth -= 1
             if depth == 0:
-                return json.loads(text[start:i + 1])
-    raise ValueError("Unbalanced JSON in evaluator response")
+                end_index = i
+                break
+
+    if end_index >= 0:
+        candidate = text[start:end_index + 1]
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError as e:
+            primary_error = e
+    else:
+        primary_error = ValueError("Could not find balanced braces accounting for strings")
+
+    # Strategy 3: greedy fallback — first { to last }.
+    last_brace = text.rfind("}")
+    if last_brace > start:
+        candidate = text[start:last_brace + 1]
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            pass
+
+    raise ValueError(f"Could not extract valid JSON from evaluator response: {primary_error}")
 
 
 # --- Main entry point --------------------------------------------------- #

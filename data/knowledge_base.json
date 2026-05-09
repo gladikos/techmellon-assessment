@@ -128,17 +128,17 @@
   },
 
   "seating": {
-    "summary": "Seat selection is available at booking, online check-in, or for a fee at the time of selection.",
+    "summary": "Seat selection is available at booking (paid), or at online check-in (free). Free-text preferences like 'window' or 'aisle' are noted at booking but not guaranteed.",
     "rules": {
-      "seat_classes": ["economy", "economy_plus", "business"],
       "seat_types": ["window", "aisle", "middle", "extra_legroom", "exit_row"],
       "free_seat_selection_at_check_in": true,
       "paid_seat_fee_eur_standard": 8,
       "paid_seat_fee_eur_extra_legroom": 20,
       "paid_seat_fee_eur_exit_row": 15,
       "exit_row_age_min": 16,
-      "exit_row_restrictions": ["no infants", "must be able to assist in evacuation", "no reduced mobility"]
+      "exit_row_restrictions": ["no infants", "must be able to assist in evacuation", "no reduced mobility"],
+      "preference_vs_assignment": "Passengers may state a seat preference (e.g. window) when booking; this is recorded but not guaranteed. Specific seats are assigned at online check-in 24h before departure, or can be locked in at booking for the standard seat fee."
     },
-    "details": "All passengers may select an available seat free of charge during online check-in (24 hours before departure). Pre-assigned seat selection at booking costs €8 for standard seats, €20 for extra legroom rows, and €15 for exit row seats. Exit row seats require passengers to be at least 16 years old, physically able to assist in an emergency evacuation, and without reduced mobility. Business class seats are always pre-assigned at booking with no extra fee."
+    "details": "Customers can select a specific seat at booking time for €8 (standard), €20 (extra legroom), or €15 (exit row). Alternatively, all passengers may choose any available seat free of charge during online check-in, which opens 24 hours before departure. If a customer simply states a preference like 'I'd like a window seat' without paying for a specific seat, the preference is noted on their booking but is not guaranteed — they will get to pick from remaining seats at online check-in. Exit row seats require passengers to be at least 16 years old, physically able to assist in an emergency evacuation, and without reduced mobility. Business and Business Flex class seats are pre-assigned at booking with no extra fee."
   }
 }

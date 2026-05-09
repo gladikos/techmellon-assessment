@@ -106,6 +106,25 @@ def _hydrate_booking(conn, booking_row) -> BookingResponse:
 async def create_booking(req: BookingCreateRequest) -> BookingResponse:
     """Book a seat on a flight. Atomic, race-free seat decrement."""
     with transaction() as conn:
+        existing = conn.execute(
+            """
+            SELECT id FROM bookings
+            WHERE flight_id = ?
+              AND passenger_email = ?
+              AND status = 'confirmed'
+            """,
+            (req.flight_id, req.passenger_email),
+        ).fetchone()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"Passenger {req.passenger_email} already has a confirmed booking "
+                    f"on flight_id {req.flight_id}. Cancel the existing booking first "
+                    f"if you need to rebook."
+                ),
+            )
+
         # Conditional UPDATE: only decrement if seats_available > 0.
         # If the flight is full or doesn't exist, rowcount will be 0.
         cursor = conn.execute(

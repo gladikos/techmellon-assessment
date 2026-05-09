@@ -27,12 +27,13 @@ SCENARIOS: list[Scenario] = [
         id="book_next_to_destination",
         title="Book the next available flight to a destination",
         persona=(
-            "You are calling Aegis Airlines because you need to fly from Athens "
-            "to Paris (CDG) as soon as possible. You'll take whatever the next "
-            "available flight is in economy class. Your name is Eleni Markou and "
-            "your email is eleni.markou@example.com. Be polite and concise. "
-            "Once the agent confirms a booking and gives you a reference, "
-            "thank them and end the call."
+            "You need to fly from Athens to Paris (CDG) as soon as possible. "
+            "When the agent gives you the next available flight, push back and "
+            "ask whether there is anything earlier. Only accept the booking "
+            "after the agent has confirmed it really is the soonest option. "
+            "Your name is {{NAME}} and your email is {{EMAIL}}. "
+            "Be polite. Once the agent confirms a booking and gives you a "
+            "reference, thank them and end the call."
         ),
         first_message="Hi, I need to book the next available flight to Paris.",
         expected_tools=("search_flights", "book_flight"),
@@ -41,13 +42,23 @@ SCENARIOS: list[Scenario] = [
         id="cheapest_within_week",
         title="Find and book the cheapest tickets within next week",
         persona=(
-            "You are calling Aegis Airlines to book the cheapest available flight "
-            "to London (LHR) anytime within the next 7 days. You're flexible on "
-            "date and time. Economy is fine. Your name is Maria Papadopoulou, "
-            "email maria.p@example.com. Be polite. Once the agent confirms the "
-            "booking and gives you a reference, thank them and end the call."
+            "You are calling Aegis Airlines to book the cheapest flight you can "
+            "find anytime within the next 7 days. You don't have a specific "
+            "destination in mind — you're looking for the cheapest deal "
+            "regardless of where it goes, as long as it's within the next "
+            "week. If the agent asks where you want to fly, tell them you're "
+            "open to any destination they offer. "
+            "IMPORTANT: This is a phone call. If the agent reads out a long "
+            "list of every flight to every city, react like a real customer "
+            "would on the phone — say something like 'wait, that's a lot to "
+            "take in, can you just tell me some of the cheapest ones?' Push "
+            "back if the agent over-explains or dumps too much information "
+            "in one turn. "
+            "Your name is {{NAME}}, email {{EMAIL}}. Be "
+            "polite. Once the agent confirms a booking and gives you a "
+            "reference, thank them and end the call."
         ),
-        first_message="Hello, I'm looking for the cheapest flight to London this week.",
+        first_message="Hello, what's the cheapest flight you have available in the next week?",
         expected_tools=("search_flights", "book_flight"),
     ),
     Scenario(
@@ -73,7 +84,7 @@ SCENARIOS: list[Scenario] = [
             "first — if the agent asks, say 'I'm not sure, can you find it some "
             "other way?' to test how the agent handles missing information. "
             "If pushed, eventually 'remember' your reference is AGX-DEMO1 and "
-            "say it. (The agent will not find this reference and should "
+            "say it. (The agent should find this reference and should "
             "explain that.) Be patient and polite. End the call after the agent "
             "has clearly explained next steps."
         ),
@@ -98,7 +109,7 @@ SCENARIOS: list[Scenario] = [
         title="Cancel an existing booking",
         persona=(
             "You want to cancel a booking. Your reference is AGX-DEMO2. (The "
-            "agent will not find this reference and should explain that "
+            "agent should find this reference and should explain that "
             "honestly.) Ask about the refund timing if cancelled. Be polite. "
             "End the call once the agent has explained the situation clearly."
         ),
@@ -111,7 +122,7 @@ SCENARIOS: list[Scenario] = [
         persona=(
             "You want to book a flight from Athens to Rome (FCO) sometime next "
             "week, in economy, and you'd like a window seat. Your name is "
-            "Andreas Christou, email andreas.c@example.com. Be polite and "
+            "{{NAME}}, email {{EMAIL}}. Be polite and "
             "concise. Once the agent confirms the booking with the seat "
             "preference noted, thank them and end the call."
         ),
@@ -123,7 +134,7 @@ SCENARIOS: list[Scenario] = [
         title="Add an extra bag or special item to an existing booking",
         persona=(
             "You have a booking (reference AGX-DEMO3) and you want to add an "
-            "extra checked bag. (The agent will not find this reference and "
+            "extra checked bag. (The agent should find this reference and "
             "should explain that.) Ask what an extra bag would cost so you "
             "have the info for next time. Be polite. End the call after the "
             "agent has explained both the missing-booking issue and the "
@@ -152,7 +163,7 @@ SCENARIOS: list[Scenario] = [
             "You are calling on behalf of your elderly father, Nikos Stavros, "
             "who has reduced mobility and needs wheelchair assistance at the "
             "airport. He has a flight booked already (reference AGX-DEMO4 — "
-            "the agent will not find this) but you want to add the wheelchair "
+            "the agent should find this reference and should explain that) but you want to add the wheelchair "
             "request. Ask what the procedure is, whether there is a fee, and "
             "how far in advance you must request it. End the call once the "
             "agent has clearly explained the policy."

@@ -260,7 +260,7 @@ def fetch_authoritative_transcript(conversation_id: str,
             flat.append({
                 "role": "tool_result",
                 "tool_name": result.get("tool_name", ""),
-                "result": str(result.get("result_value", ""))[:1000],
+                "result": str(result.get("result_value", "")),
                 "is_error": bool(result.get("is_error")),
             })
 

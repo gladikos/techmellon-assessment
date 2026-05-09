@@ -27,7 +27,9 @@ from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.database import init_db
+# from backend.database import init_db - We do not need to initialize the 
+# database at startup, as the seed function will handle that.
+from backend.seed import seed
 from backend.routes import bookings, flights, knowledge
 from backend.routes.dashboard import router as dashboard_router
 
@@ -73,8 +75,8 @@ class WebsocketBroadcastHandler(logging.Handler):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup: ensure the schema exists. Shutdown: nothing to do."""
-    init_db()
+    """Startup: wipe and re-seed the database for a clean state. Shutdown: nothing to do."""
+    seed()
     yield
 
 

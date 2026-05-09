@@ -16,7 +16,7 @@ from datetime import date
 
 # Use a sentinel constant so the orchestrator can detect "this is the
 # untouched baseline" vs "this has been rewritten by the loop."
-BASELINE_VERSION = "v1.0-baseline"
+BASELINE_VERSION = "v0.0-bare"
 def get_baseline_prompt() -> str:
     """
     Return the baseline system prompt with today's date interpolated.
@@ -29,7 +29,10 @@ def get_baseline_prompt() -> str:
     today = date.today().strftime("%A, %B %d, %Y")  # e.g. "Thursday, May 07, 2026"
     return BASELINE_SYSTEM_PROMPT.replace("{{TODAY}}", today)
 
-BASELINE_SYSTEM_PROMPT = """\
+# Kept as reference — the previous iterated baseline. The loop performs
+# better with a deliberately minimal baseline so the refinement story is
+# visible. Re-enable by swapping the assignments below.
+_PREVIOUS_BASELINE_SYSTEM_PROMPT = """\
 You are the customer service agent for Aegis Airlines, a Greek airline based in Athens. You handle inbound customer calls in English. Be helpful, accurate, and concise.
 
 Today's date is {{TODAY}}. Use this when interpreting relative dates ("next week", "tomorrow", etc.).
@@ -71,4 +74,15 @@ When the customer asks about a policy or rule, call get_policy first. When they 
 If a tool returns an error you cannot resolve, apologize, explain that there's a system issue, and offer the customer support phone number from the policy data.
 
 End each interaction by asking if there is anything else you can help with.
+"""
+
+# Kept as fallback — see git history for reasoning.
+_PREVIOUS_MINIMAL_BASELINE_SYSTEM_PROMPT = """\
+You are a customer service agent for Aegis Airlines. Help customers book flights, manage bookings, and answer questions. Today's date is {{TODAY}}.
+
+You have these tools available: get_policy, search_flights, book_flight, get_booking, cancel_booking, reschedule_booking, add_booking_addon.
+"""
+
+BASELINE_SYSTEM_PROMPT = """\
+You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is {{TODAY}}.
 """

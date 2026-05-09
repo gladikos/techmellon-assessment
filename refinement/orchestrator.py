@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -42,6 +42,26 @@ MAX_ITERATIONS = int(os.getenv("MAX_ITERATIONS", "5"))
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LOGS_ROOT = PROJECT_ROOT / "logs"
+
+# Passenger pool used to rotate identities across iterations for scenarios
+# that CREATE new bookings. Prevents the duplicate-booking check (same email
+# + same flight) from firing on iteration 2+.
+PASSENGER_POOL: list[tuple[str, str]] = [
+    ("Maria Papadopoulou", "maria.p@example.com"),
+    ("Andreas Christou",   "andreas.c@example.com"),
+    ("Eleni Markou",       "eleni.markou@example.com"),
+    ("Nikos Stavros",      "nikos.s@example.com"),
+    ("Sofia Dimitriou",    "sofia.d@example.com"),
+]
+
+# Scenario IDs whose personas must be rotated each iteration.
+# Other scenarios either don't INSERT new bookings or rely on a fixed
+# seeded passenger name to match a demo booking.
+ROTATING_SCENARIO_IDS = {
+    "book_next_to_destination",
+    "cheapest_within_week",
+    "seat_preference",
+}
 
 
 # --- Result types ------------------------------------------------------- #
@@ -183,10 +203,21 @@ def run_pipeline(scenario_id: str,
 
     for iteration_num in range(1, max_iterations + 1):
         _print_iteration_header(iteration_num, current_version)
+        if scenario.id in ROTATING_SCENARIO_IDS:
+            name, email = PASSENGER_POOL[(iteration_num - 1) % len(PASSENGER_POOL)]
+            rotated_persona = (
+                scenario.persona
+                .replace("{{NAME}}", name)
+                .replace("{{EMAIL}}", email)
+            )
+            iter_scenario = replace(scenario, persona=rotated_persona)
+        else:
+            name, iter_scenario = None, scenario
         emit("iteration_started", {
             "iteration": iteration_num,
             "prompt_version": current_version,
             "prompt_text": current_prompt,
+            **({"passenger": name} if name else {}),
         })
 
         record = IterationRecord(
@@ -215,7 +246,7 @@ def run_pipeline(scenario_id: str,
 
         # 2) Run simulation
         print("\n  → Running simulation...")
-        sim: SimulationResult = run_scenario(scenario, max_turns=max_turns_per_scenario,
+        sim: SimulationResult = run_scenario(iter_scenario, max_turns=max_turns_per_scenario,
                                               on_turn=lambda turn: emit("transcript_turn", turn))
         record.transcript = sim.transcript
         if sim.error:

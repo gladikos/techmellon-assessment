@@ -51,10 +51,17 @@ FLIGHT_NUMBER_PREFIXES = {
 
 # Fare classes and their price multipliers / capacities.
 # Tuple: (fare_class, price_multiplier, seat_count)
+# economy_light: cheapest, no checked bag, non-refundable
+# economy:       standard, one checked bag, partial refund
+# economy_flex:  premium economy, fully refundable, free changes
+# business:      lie-flat, two checked bags, partial refund
+# business_flex: business + fully refundable, priority changes
 FARE_CLASSES = [
     ("economy_light", 0.65, 30),
     ("economy",       1.00, 80),
+    ("economy_flex",  1.40, 25),
     ("business",      2.80, 12),
+    ("business_flex", 3.60, 8),
 ]
 
 # Departure time slots (24h format). Most routes get 2 daily flights.
@@ -131,6 +138,88 @@ def seed() -> None:
             """,
             flights,
         )
+
+        demo_bookings = [
+            {
+                "reference": "AGX-DEMO1",
+                "passenger_name": "Maria Papadopoulou",
+                "passenger_email": "maria.p@example.com",
+                "fare_class": "economy",
+                "flight_lookup": {"flight_number": "AG100", "fare_class": "economy"},
+            },
+            {
+                "reference": "AGX-DEMO2",
+                "passenger_name": "Andreas Christou",
+                "passenger_email": "andreas.c@example.com",
+                "fare_class": "economy",
+                "flight_lookup": {"flight_number": "AG200", "fare_class": "economy"},
+            },
+            {
+                "reference": "AGX-DEMO3",
+                "passenger_name": "Eleni Markou",
+                "passenger_email": "eleni.m@example.com",
+                "fare_class": "economy",
+                "flight_lookup": {"flight_number": "AG300", "fare_class": "economy"},
+            },
+            {
+                "reference": "AGX-DEMO4",
+                "passenger_name": "Nikos Stavros",
+                "passenger_email": "nikos.s@example.com",
+                "fare_class": "economy",
+                "flight_lookup": {"flight_number": "AG400", "fare_class": "economy"},
+            },
+        ]
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        for booking in demo_bookings:
+            reference = booking["reference"]
+            flight_number = booking["flight_lookup"]["flight_number"]
+            fare_class_lookup = booking["flight_lookup"]["fare_class"]
+
+            row = conn.execute(
+                """
+                SELECT id, price_eur FROM flights
+                WHERE flight_number = ? AND fare_class = ? AND departure_time > ?
+                ORDER BY departure_time
+                LIMIT 1
+                """,
+                (flight_number, fare_class_lookup, now_iso),
+            ).fetchone()
+
+            if row is None:
+                raise RuntimeError(
+                    f"Could not find a future flight for {reference}: "
+                    f"{flight_number}/{fare_class_lookup}"
+                )
+
+            flight_id = row["id"]
+            price_paid = row["price_eur"]
+
+            conn.execute(
+                """
+                INSERT INTO bookings (
+                    reference, flight_id, passenger_name, passenger_email,
+                    fare_class, price_paid_eur, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
+                """,
+                (
+                    reference,
+                    flight_id,
+                    booking["passenger_name"],
+                    booking["passenger_email"],
+                    booking["fare_class"],
+                    price_paid,
+                    now_iso,
+                ),
+            )
+
+            conn.execute(
+                "UPDATE flights SET seats_available = seats_available - 1 WHERE id = ?",
+                (flight_id,),
+            )
+
+        print(f"Seeded {len(demo_bookings)} demo bookings: AGX-DEMO1..AGX-DEMO4")
 
     print(f"Seeded {len(flights)} flight rows across "
           f"{len(ROUTES)} destinations × 7 days × {len(FARE_CLASSES)} fare classes.")

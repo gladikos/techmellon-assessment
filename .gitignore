@@ -21,8 +21,7 @@ data/*.db-wal
 data/*.db-shm
 
 # === Logs (generated, but keep the folder via .gitkeep) ===
-logs/*.json
-logs/*.log
+logs/*
 !logs/.gitkeep
 
 # === IDE ===
