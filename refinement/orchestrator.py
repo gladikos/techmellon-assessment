@@ -116,27 +116,62 @@ def _write_iteration_log(log_dir: Path, record: IterationRecord) -> None:
 
 def _write_run_summary(log_dir: Path, run: RunResult) -> None:
     path = log_dir / "run_summary.json"
+
+    iters = run.iterations
+    first_scores = iters[0].scores if iters else {}
+    final_scores = iters[-1].scores if iters else {}
+
+    changelog = []
+    for it in iters:
+        entry = {
+            "iteration": it.iteration,
+            "prompt_version": it.prompt_version,
+            "scores": it.scores,
+            "overall_pass": it.overall_pass,
+            "failures": [
+                {"criterion": f.get("criterion"), "root_cause": f.get("root_cause"), "issue": f.get("issue")}
+                for f in it.failures
+            ],
+            "prompt_fix_summary": it.prompt_fix_summary,
+            "code_fix_summary": it.code_fix_summary,
+            "code_patches_applied": it.code_patches_applied,
+            "code_patches_rejected": it.code_patches_rejected,
+        }
+        changelog.append(entry)
+
+    prompt_failures = sum(1 for it in iters for f in it.failures if f.get("root_cause") == "prompt")
+    code_failures = sum(1 for it in iters for f in it.failures if f.get("root_cause") == "code")
+
+    deltas = {k: final_scores.get(k, 0) - first_scores.get(k, 0) for k in first_scores.keys()}
+
     summary = {
         "scenario_id": run.scenario_id,
         "started_at": run.started_at,
         "finished_at": run.finished_at,
         "converged": run.converged,
-        "iterations_run": len(run.iterations),
+        "iterations_run": len(iters),
         "max_iterations": run.max_iterations,
         "pass_threshold": run.pass_threshold,
         "final_version": run.final_version,
+        "improvement": {
+            "first_scores": first_scores,
+            "final_scores": final_scores,
+            "deltas": deltas,
+            "iterations_used": len(iters),
+            "converged": run.converged,
+        },
+        "root_cause_totals": {"prompt_failures": prompt_failures, "code_failures": code_failures},
+        "changelog": changelog,
+        "starting_prompt": iters[0].prompt_text if iters else "",
+        "final_prompt": iters[-1].prompt_text if iters else "",
         "scores_by_iteration": [
-            {
-                "iteration": it.iteration,
-                "version": it.prompt_version,
-                "scores": it.scores,
-                "overall_pass": it.overall_pass,
-            }
-            for it in run.iterations
+            {"iteration": it.iteration, "version": it.prompt_version, "scores": it.scores, "overall_pass": it.overall_pass}
+            for it in iters
         ],
-        "first_scores": run.iterations[0].scores if run.iterations else {},
-        "final_scores": run.iterations[-1].scores if run.iterations else {},
+        "first_scores": first_scores,
+        "final_scores": final_scores,
     }
+
     with open(path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
 
