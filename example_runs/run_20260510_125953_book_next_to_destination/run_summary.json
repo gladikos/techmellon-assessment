@@ -1,0 +1,87 @@
+{
+  "scenario_id": "book_next_to_destination",
+  "started_at": "2026-05-10T12:59:53.291052",
+  "finished_at": "2026-05-10T13:00:47.153242",
+  "converged": true,
+  "iterations_run": 1,
+  "max_iterations": 5,
+  "pass_threshold": 8,
+  "final_version": "v0.0-bare",
+  "improvement": {
+    "first_scores": {
+      "understanding": 10,
+      "tool_use": 10,
+      "outcome": 10,
+      "conversation_quality": 9
+    },
+    "final_scores": {
+      "understanding": 10,
+      "tool_use": 10,
+      "outcome": 10,
+      "conversation_quality": 9
+    },
+    "deltas": {
+      "understanding": 0,
+      "tool_use": 0,
+      "outcome": 0,
+      "conversation_quality": 0
+    },
+    "iterations_used": 1,
+    "converged": true
+  },
+  "root_cause_totals": {
+    "prompt_failures": 1,
+    "code_failures": 0
+  },
+  "changelog": [
+    {
+      "iteration": 1,
+      "prompt_version": "v0.0-bare",
+      "scores": {
+        "understanding": 10,
+        "tool_use": 10,
+        "outcome": 10,
+        "conversation_quality": 9
+      },
+      "overall_pass": true,
+      "failures": [
+        {
+          "criterion": "conversation_quality",
+          "root_cause": "prompt",
+          "issue": "The agent repeated the full fare class list unnecessarily after already presenting it earlier in the conversation, adding minor redundancy."
+        }
+      ],
+      "prompt_fix_summary": null,
+      "code_fix_summary": null,
+      "code_patches_applied": 0,
+      "code_patches_rejected": 0
+    }
+  ],
+  "starting_prompt": "You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n",
+  "final_prompt": "You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n",
+  "scores_by_iteration": [
+    {
+      "iteration": 1,
+      "version": "v0.0-bare",
+      "scores": {
+        "understanding": 10,
+        "tool_use": 10,
+        "outcome": 10,
+        "conversation_quality": 9
+      },
+      "overall_pass": true
+    }
+  ],
+  "first_scores": {
+    "understanding": 10,
+    "tool_use": 10,
+    "outcome": 10,
+    "conversation_quality": 9
+  },
+  "final_scores": {
+    "understanding": 10,
+    "tool_use": 10,
+    "outcome": 10,
+    "conversation_quality": 9
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "iteration": 1,
+  "prompt_version": "v0.0-bare",
+  "prompt_text": "You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n",
+  "scenario_id": "add_extra_bag",
+  "transcript": [
+    {
+      "role": "agent",
+      "message": "Thank you for calling Aegis Airlines. How can I help you today?"
+    },
+    {
+      "role": "user",
+      "message": "Hi, I'd like to add an extra bag to my booking."
+    },
+    {
+      "role": "agent",
+      "message": "I'd be happy to help you add an extra bag to your booking. To get started, I'll need your booking reference number. It should be in the format AGX-XXXXX (for example, AGX-7K2P9). Could you please provide that?"
+    },
+    {
+      "role": "user",
+      "message": "Sure, it's AGX-DEMO3."
+    },
+    {
+      "role": "agent",
+      "message": "Thank you. Let me pull up your booking det..."
+    },
+    {
+      "role": "tool_call",
+      "tool_name": "get_booking",
+      "params": "{\"reference\": \"AGX-DEMO3\"}"
+    },
+    {
+      "role": "tool_result",
+      "tool_name": "get_booking",
+      "result": "{\"reference\":\"AGX-DEMO3\",\"flight_id\":13252,\"flight_number\":\"AG300\",\"origin\":\"ATH\",\"destination\":\"FCO\",\"departure_time\":\"2026-05-11T08:00:00+00:00\",\"passenger_name\":\"Eleni Markou\",\"passenger_email\":\"eleni.m@example.com\",\"seat\":null,\"seat_preference\":null,\"fare_class\":\"economy\",\"price_paid_eur\":86.68,\"status\":\"confirmed\",\"created_at\":\"2026-05-10T09:59:30.450741+00:00\",\"cancelled_at\":null,\"addons\":[]}",
+      "is_error": false
+    },
+    {
+      "role": "tool_call",
+      "tool_name": "get_policy",
+      "params": "{\"topic\": \"baggage\"}"
+    },
+    {
+      "role": "tool_result",
+      "tool_name": "get_policy",
+      "result": "{\"topic\":\"baggage\",\"summary\":\"All fares include one cabin bag; hold baggage allowance and excess fees depend on fare class.\",\"rules\":{\"cabin_bag_max_weight_kg\":8,\"cabin_bag_max_dimensions_cm\":\"55x40x20\",\"personal_item_max_dimensions_cm\":\"40x30x15\",\"hold_bag_included\":{\"economy_light\":0,\"economy\":1,\"business\":2},\"hold_bag_max_weight_kg\":23,\"extra_hold_bag_fee_eur\":35,\"excess_weight_fee_eur_per_kg\":15,\"oversized_bag_fee_eur\":75},\"details\":\"Every passenger may bring one cabin bag (up to 8kg, 55x40x20cm) and one personal item (40x30x15cm) free of charge. Hold baggage allowance varies by fare: Economy Light includes no checked bags, Economy includes one 23kg bag, Business includes two 23kg bags. Additional hold bags cost €35 each when added in advance, or €50 at the airport. Bags exceeding 23kg incur an excess fee of €15 per kilogram. Bags larger than 158cm total dimensions are charged €75 as oversized. Add baggage online up to 4 hours before departure for the lowest fee.\"}",
+      "is_error": false
+    },
+    {
+      "role": "user",
+      "message": "Perfect, that's the right booking. So what would it cost me to add an extra checked bag?"
+    },
+    {
+      "role": "agent",
+      "message": "Great! I can see your booking is for Eleni Markou on flight AG300 from Athens to Rome tomorrow morning. You're booked on Economy fare, which includes one free checked bag of up to 23kg.\n\nTo add an extra checked bag, it would cost €35 if you add it now online, or €50 if you wait and add it at the airport. Since your flight departs tomorrow at 8:00 AM, I'd recommend adding it now to get the better rate.\n\nWould you like me to go ahead and add an extra checked bag to your booking for €35?"
+    },
+    {
+      "role": "user",
+      "message": "Yes, that's helpful to know for next time — €35 online or €50 at the airport. But actually, I think I'll manage with just the one bag for this trip, so I don't need to add it right now. Thanks for letting me know the pricing though!\n\nThanks so much for your help."
+    },
+    {
+      "role": "agent",
+      "message": "You're very welcome! I'm glad I could help clarify the baggage options for you. If you do need to add an extra bag before your flight tomorrow, just remember you can do it online up to 4 hours before departure for €35. Have a great trip to Rome, and thank you for flying with Aegis Airlines!"
+    }
+  ],
+  "scores": {
+    "understanding": 9,
+    "tool_use": 10,
+    "outcome": 8,
+    "conversation_quality": 9
+  },
+  "overall_pass": true,
+  "failures": [
+    {
+      "criterion": "outcome",
+      "quote": "I can see your booking is for Eleni Markou on flight AG300 from Athens to Rome tomorrow morning.",
+      "issue": "The scenario specifies the agent should explain a 'missing-booking issue,' but the booking was found successfully and no such issue was flagged or explained.",
+      "root_cause": "prompt",
+      "suggested_fix": "The agent should check for and communicate any relevant booking anomalies (e.g., no seat assigned, booking created very close to departure) as the scenario expects a 'missing-booking issue' to be surfaced."
+    }
+  ],
+  "summary": "The agent handled the call competently: it retrieved the booking and baggage policy correctly, clearly communicated the extra bag fees (€35 online, €50 at airport), and wrapped up professionally. However, the scenario expected the agent to surface a 'missing-booking issue,' which was never identified or communicated to the customer.",
+  "prompt_fix_summary": null,
+  "code_fix_summary": null,
+  "code_patches_applied": 0,
+  "code_patches_rejected": 0,
+  "error": null
+}

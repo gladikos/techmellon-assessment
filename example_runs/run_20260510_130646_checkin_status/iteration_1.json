@@ -1,0 +1,81 @@
+{
+  "iteration": 1,
+  "prompt_version": "v0.0-bare",
+  "prompt_text": "You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n",
+  "scenario_id": "checkin_status",
+  "transcript": [
+    {
+      "role": "agent",
+      "message": "Thank you for calling Aegis Airlines. How can I help you today?"
+    },
+    {
+      "role": "user",
+      "message": "Hi, I have a flight tomorrow. When does check-in open?"
+    },
+    {
+      "role": "agent",
+      "message": "I'd be happy to help you with check-in information. To give you the most accurate details, could you please provide your booking reference? It's in the format AGX-XXXXX. Once I have that, I can look up your flight details and confirm the check-in times for you."
+    },
+    {
+      "role": "user",
+      "message": "I don't have my booking reference handy right now, but I'm just looking for the general policy — like, when does online check-in typically open for your flights?"
+    },
+    {
+      "role": "agent",
+      "message": "That's a good question. Let me pull up our check-in policy for you."
+    },
+    {
+      "role": "tool_call",
+      "tool_name": "get_policy",
+      "params": "{\"topic\": \"check_in\"}"
+    },
+    {
+      "role": "tool_result",
+      "tool_name": "get_policy",
+      "result": "{\"topic\":\"check_in\",\"summary\":\"Online check-in opens 24 hours before departure; airport counters close 45 minutes before.\",\"rules\":{\"online_opens_hours_before\":24,\"online_closes_hours_before\":2,\"airport_counter_opens_hours_before\":3,\"airport_counter_closes_minutes_before\":45,\"boarding_opens_minutes_before\":30,\"gate_closes_minutes_before\":15,\"mobile_boarding_pass_supported\":true},\"details\":\"Online check-in opens 24 hours and closes 2 hours before scheduled departure, available via the website, mobile app, or kiosk. Airport check-in counters open 3 hours before departure and close strictly 45 minutes before. Boarding gates open 30 minutes before departure and close 15 minutes before. Passengers arriving after gate closure will be denied boarding regardless of fare class. Mobile boarding passes are accepted at all Aegis-operated airports.\"}",
+      "is_error": false
+    },
+    {
+      "role": "agent",
+      "message": "Here's our check-in policy:\n\nOnline check-in opens 24 hours before your flight's scheduled departure time and closes 2 hours before departure. You can check in through our website, mobile app, or airport kiosk.\n\nIf you prefer to check in at the airport counter, those open 3 hours before departure and close 45 minutes before. Boarding gates open 30 minutes before departure and close 15 minutes before, so it's important to arrive with enough time.\n\nWe also support mobile boarding passes, so you can use your phone at the gate if you prefer.\n\nSince your flight is tomorrow, your online check-in window will open 24 hours from your departure time. Is there anything else you'd like to know about check-in?"
+    },
+    {
+      "role": "user",
+      "message": "That's helpful, thanks! So just to confirm — the airport counter closes 45 minutes before departure, right? And how do I find out which gate my flight is at?"
+    },
+    {
+      "role": "agent",
+      "message": "Yes, that's correct — the airport counter closes 45 minutes before your scheduled departure time, so you'll want to arrive well before then to allow time for check-in and getting through security.\n\nAs for your gate information, that's typically displayed on airport monitors and announced closer to your departure time. Gate assignments are usually finalized about 1-2 hours before departure. You can also check your boarding pass or our website/app once you've checked in, as the gate will be shown there.\n\nIf you have your booking reference handy later, you can log into your account on our website or app to see your flight details, and the gate will be updated there as well once it's assigned.\n\nIs there anything else I can help you with regarding your flight tomorrow?"
+    },
+    {
+      "role": "user",
+      "message": "Perfect, that answers all my questions. Thanks for your help!"
+    },
+    {
+      "role": "agent",
+      "message": "You're welcome! Have a great flight tomorrow, and thank you for flying with Aegis Airlines. If you need anything else before your departure, feel free to reach out. Safe travels!"
+    }
+  ],
+  "scores": {
+    "understanding": 9,
+    "tool_use": 9,
+    "outcome": 9,
+    "conversation_quality": 8
+  },
+  "overall_pass": true,
+  "failures": [
+    {
+      "criterion": "conversation_quality",
+      "quote": "To give you the most accurate details, could you please provide your booking reference? It's in the format AGX-XXXXX. Once I have that, I can look up your flight details and confirm the check-in times for you.",
+      "issue": "The agent initially asked for a booking reference before attempting to answer a clearly general policy question, adding unnecessary friction.",
+      "root_cause": "prompt",
+      "suggested_fix": "Instruct the agent to first attempt answering general policy questions with get_policy before requesting personal details like a booking reference."
+    }
+  ],
+  "summary": "The agent successfully answered all three of the customer's questions about online check-in opening times, airport counter closing times, and gate information, using the get_policy tool effectively. The only minor misstep was an unnecessary request for a booking reference before recognizing the question was policy-related.",
+  "prompt_fix_summary": null,
+  "code_fix_summary": null,
+  "code_patches_applied": 0,
+  "code_patches_rejected": 0,
+  "error": null
+}
