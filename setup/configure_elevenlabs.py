@@ -76,6 +76,40 @@ def load_tool_specs() -> list[dict]:
     return specs
 
 
+def _normalize_for_create(spec: dict) -> dict:
+    """
+    Convert array-form fields in a dashboard-exported tool spec into the
+    dict/object form the ElevenLabs create API expects.
+
+      request_headers:      [{type, name, value}, ...]  → {name: value, ...}
+      path_params_schema:   [{id, required, ...}, ...]  → {properties: {id: {...}}, required: [...]}
+      query_params_schema:  [{id, required, ...}, ...]  → {properties: {id: {...}}, required: [...]}
+    """
+    import copy
+    out = copy.deepcopy(spec)
+    api = out.get("api_schema") or {}
+
+    headers = api.get("request_headers")
+    if isinstance(headers, list):
+        api["request_headers"] = {h["name"]: h["value"] for h in headers}
+
+    for key in ("path_params_schema", "query_params_schema"):
+        params = api.get(key)
+        if isinstance(params, list):
+            properties = {}
+            required = []
+            for p in params:
+                p_copy = dict(p)
+                param_id = p_copy.pop("id")
+                if p_copy.pop("required", False):
+                    required.append(param_id)
+                properties[param_id] = p_copy
+            api[key] = {"properties": properties, "required": required}
+
+    out["api_schema"] = api
+    return out
+
+
 def list_existing_tools() -> dict[str, str]:
     """Return {tool_name: tool_id} for all tools on the account."""
     resp = request("GET", "/convai/tools")
@@ -94,18 +128,19 @@ def list_existing_tools() -> dict[str, str]:
     return result
 
 
-def create_tool(spec: dict) -> str:
-    """Create a tool from a spec, return its ID."""
-    payload = {"tool_config": spec}
+def create_tool(spec: dict) -> str | None:
+    """Create a tool from a spec, return its ID, or None on failure."""
+    normalized = _normalize_for_create(spec)
+    payload = {"tool_config": normalized}
     resp = request("POST", "/convai/tools", json_body=payload)
     if resp.status_code not in (200, 201):
         print(f"  ✗ Failed to create tool {spec['name']}: {resp.status_code} {resp.text}")
-        sys.exit(1)
+        return None
     data = resp.json()
     tool_id = data.get("id") or data.get("tool_id")
     if not tool_id:
         print(f"  ✗ Created tool {spec['name']} but no ID in response: {data}")
-        sys.exit(1)
+        return None
     return tool_id
 
 
@@ -191,6 +226,7 @@ def main() -> None:
     print(f"  Found {len(existing)} existing tool(s) on account.")
 
     tool_ids: list[str] = []
+    failed_tools: list[str] = []
     for spec in specs:
         name = spec["name"]
         if name in existing:
@@ -199,8 +235,18 @@ def main() -> None:
         else:
             print(f"  • {name}: creating...")
             tid = create_tool(spec)
-            print(f"    ✓ created with id {tid}")
-            tool_ids.append(tid)
+            if tid is not None:
+                print(f"    ✓ created with id {tid}")
+                tool_ids.append(tid)
+            else:
+                failed_tools.append(name)
+    if failed_tools:
+        print(f"  ⚠️  Could not create {len(failed_tools)} tool(s): {failed_tools}")
+        print(f"  ⚠️  These tools must be created manually in the ElevenLabs dashboard.")
+        print(f"         See setup/README.md for instructions.")
+        print(f"  ⚠️  Re-run this script after manual creation to attach them to your agent.")
+    if not tool_ids:
+        print("  ⚠️  No tools available; agent will be configured without any tools.")
     print()
 
     # 3. Load baseline system prompt.
