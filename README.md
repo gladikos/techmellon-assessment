@@ -75,7 +75,8 @@ Every free ngrok account gets one **static dev domain**. Find yours at [dashboar
 # 1. Clone and install
 git clone https://github.com/gladikos/techmellon-assessment.git
 cd techmellon-assessment
-python -m venv .venv
+python -m venv .venv # or py -m venv .venv for Windows
+python3 -m venv .venv # for macOS users
 
 # Activate the virtual environment:
 source .venv/bin/activate          # macOS / Linux
