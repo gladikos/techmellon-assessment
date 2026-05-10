@@ -379,7 +379,7 @@ def run_pipeline(scenario_id: str,
                         "patches_rejected": len(cfix.patches_rejected),
                         "summary": cfix.summary,
                     })
-                    time.sleep(2)  # let uvicorn finish reloading
+                    time.sleep(7)  # let uvicorn finish reloading
                 else:
                     print(f"    (No patches applied; {len(cfix.patches_rejected)} rejected.)")
             except Exception as e:
