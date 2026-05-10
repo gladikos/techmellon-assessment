@@ -203,7 +203,7 @@ class TextConversation:
             self._conversation = None
 
 def fetch_authoritative_transcript(conversation_id: str,
-                                    max_wait_seconds: float = 30.0,
+                                    max_wait_seconds: float = 60.0,
                                     poll_interval: float = 1.5) -> list[dict]:
     """
     Fetch the conversation's full server-side transcript from ElevenLabs
@@ -220,20 +220,44 @@ def fetch_authoritative_transcript(conversation_id: str,
     This is the ground-truth transcript: it includes every tool event
     that fired server-side, in the correct order. Use this as the
     transcript fed to the evaluator.
+
+    Raises:
+        TimeoutError: if ElevenLabs does not finish post-processing
+            within max_wait_seconds. Callers should fall back to the
+            in-memory transcript captured during the live conversation.
+        RuntimeError: if ElevenLabs reports status='failed'.
     """
     import time as _time
 
     # Poll until ElevenLabs finishes processing.
     deadline = _time.time() + max_wait_seconds
     data: dict = {}
+    last_status: Optional[str] = None
+    saw_done = False
     while _time.time() < deadline:
         data = _request("GET", f"/convai/conversations/{conversation_id}")
-        status = data.get("status")
-        if status == "done":
+        last_status = data.get("status")
+        if last_status == "done":
+            saw_done = True
             break
-        if status == "failed":
-            return []
+        if last_status == "failed":
+            raise RuntimeError(
+                f"ElevenLabs reported status='failed' for conversation {conversation_id}"
+            )
         _time.sleep(poll_interval)
+
+    if not saw_done:
+        # Timed out waiting for post-processing. Better to surface this as
+        # an exception than to silently return an empty/partial transcript.
+        print(
+            f"[fetch_authoritative_transcript] Timed out after {max_wait_seconds}s "
+            f"waiting for conversation {conversation_id} (last status: {last_status}). "
+            f"Caller will fall back to in-memory transcript."
+        )
+        raise TimeoutError(
+            f"ElevenLabs post-processing did not complete within {max_wait_seconds}s "
+            f"for conversation {conversation_id} (last status: {last_status})"
+        )
 
     # Translate ElevenLabs' transcript turns into our flat format.
     flat: list[dict] = []
