@@ -176,6 +176,36 @@ def _write_run_summary(log_dir: Path, run: RunResult) -> None:
         json.dump(summary, f, indent=2, ensure_ascii=False)
 
 
+def _write_single_recorded_run(run: RunResult) -> None:
+    """
+    Write a minimal JSON file at the project root containing only the
+    three fields the assessment brief specifies for the 'recorded example
+    run' deliverable: starting prompt, scores per iteration, and final
+    refined prompt. Overwritten every run; always reflects the most
+    recent pipeline run.
+    """
+    iters = run.iterations
+    path = PROJECT_ROOT / "single_recorded_run.json"
+    payload = {
+        "scenario_id": run.scenario_id,
+        "converged": run.converged,
+        "iterations_run": len(iters),
+        "starting_prompt": iters[0].prompt_text if iters else "",
+        "scores_per_iteration": [
+            {
+                "iteration": it.iteration,
+                "prompt_version": it.prompt_version,
+                "scores": it.scores,
+                "overall_pass": it.overall_pass,
+            }
+            for it in iters
+        ],
+        "final_refined_prompt": iters[-1].prompt_text if iters else "",
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
+
 # --- Pretty printer for the console -------------------------------------- #
 
 def _print_iteration_header(iteration: int, version: str) -> None:
@@ -392,6 +422,7 @@ def run_pipeline(scenario_id: str,
     if not run.final_version:
         run.final_version = current_version
     _write_run_summary(log_dir, run)
+    _write_single_recorded_run(run)
 
     print(f"\n{'=' * 60}")
     print(f"  RUN COMPLETE")

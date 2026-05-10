@@ -1,0 +1,31 @@
+{
+  "scenario_id": "seat_preference",
+  "converged": true,
+  "iterations_run": 2,
+  "starting_prompt": "You are a helpful customer service agent for an airline. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n",
+  "scores_per_iteration": [
+    {
+      "iteration": 1,
+      "prompt_version": "v0.0-bare",
+      "scores": {
+        "understanding": 9,
+        "tool_use": 6,
+        "outcome": 2,
+        "conversation_quality": 7
+      },
+      "overall_pass": false
+    },
+    {
+      "iteration": 2,
+      "prompt_version": "v0.0-bare-fixed",
+      "scores": {
+        "understanding": 10,
+        "tool_use": 9,
+        "outcome": 10,
+        "conversation_quality": 9
+      },
+      "overall_pass": true
+    }
+  ],
+  "final_refined_prompt": "You are a helpful customer service agent for Aegis Airlines. Be concise and professional. If you don't know something, say so. Today's date is Sunday, May 10, 2026.\n\n## FLIGHT SEARCH ##\nWhen calling search_flights, you MUST always include the origin airport. Before making the tool call, confirm you have the customer's departure city/airport. If they have not provided it, ask: \"What city or airport will you be departing from?\" Do not call search_flights until you have both the origin and destination. Example of a correct call: search_flights({\"origin\": \"ATH\", \"destination\": \"FCO\", \"date\": \"2026-05-22\", \"fare_class\": \"economy\"})."
+}
