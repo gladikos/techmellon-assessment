@@ -1,0 +1,98 @@
+{
+  "type": "webhook",
+  "name": "search_flights",
+  "description": "Search the Aegis Airlines flight catalog. Use this when the customer wants to find or book a flight, asks about prices, availability, or wants the cheapest/next option. Required: destination (3-letter IATA code, e.g. CDG, LHR, FCO, BCN, IST). Optional: date (YYYY-MM-DD), max_price (EUR), fare_class. Returns up to 20 flights ordered by departure time then price.",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/flights/search",
+    "method": "GET",
+    "path_params_schema": [],
+    "query_params_schema": [
+      {
+        "id": "destination",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "3-letter IATA airport code (uppercase). Optional — omit when searching across all destinations to find the cheapest or earliest flights overall.",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      },
+      {
+        "id": "date",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "ISO date YYYY-MM-DD (optional).",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      },
+      {
+        "id": "max_price",
+        "type": "number",
+        "value_type": "llm_prompt",
+        "description": "Maximum price in EUR (optional).",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      },
+      {
+        "id": "fare_class",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "One of: economy_light, economy, economy_flex, business, business_flex (optional).\n",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      },
+      {
+        "id": "sort",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "Sort order. Use 'price' to get cheapest flights first (best for \"what's the cheapest\" queries). Use 'time' for chronological order (default, best for \"next available flight\" queries).",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": [
+          "time",
+          "price"
+        ],
+        "is_system_provided": false,
+        "required": false
+      }
+    ],
+    "request_body_schema": null,
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}

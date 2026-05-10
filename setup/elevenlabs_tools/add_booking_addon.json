@@ -1,0 +1,92 @@
+{
+  "type": "webhook",
+  "name": "add_booking_addon",
+  "description": "Attach an addon to an existing booking: extra baggage, pet, sports equipment, musical instrument, special assistance, pram, or wheelchair. Use get_policy to confirm fees and rules before calling. Pass the addon_type, a short description, and the fee.\n",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/bookings/{reference}/addons",
+    "method": "POST",
+    "path_params_schema": [
+      {
+        "id": "reference",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "The booking reference, format AGX-XXXXX.",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      }
+    ],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "The addon to attach: type, description, and fee.",
+      "properties": [
+        {
+          "id": "addon_type",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "One of: baggage, pet, sports_equipment, musical_instrument, special_assistance, pram, wheelchair.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "description",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Short human-readable description, e.g. 'Extra hold bag, 23kg'.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "fee_eur",
+          "type": "number",
+          "value_type": "llm_prompt",
+          "description": "Fee in EUR. Look up via get_policy if unsure.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        }
+      ],
+      "required": false,
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}

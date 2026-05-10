@@ -1,0 +1,70 @@
+{
+  "type": "webhook",
+  "name": "cancel_booking",
+  "description": "Cancel an existing booking and return the seat to inventory. Confirm the customer's intent before calling. After cancellation, explain refund timing per the cancellation policy (use get_policy for exact figures).\n",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/bookings/{reference}/cancel",
+    "method": "POST",
+    "path_params_schema": [
+      {
+        "id": "reference",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "The booking reference, format AGX-XXXXX.",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      }
+    ],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "This endpoint takes no body content; the field below is a placeholder.\n",
+      "properties": [
+        {
+          "id": "_placeholder",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Unused placeholder; leave empty.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": false
+        }
+      ],
+      "required": false,
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}

@@ -1,0 +1,91 @@
+{
+  "type": "webhook",
+  "name": "book_flight",
+  "description": "Create a booking on a specific flight. Call this ONLY after the customer has confirmed which flight they want and provided their name and email. Returns a booking reference like AGX-7K2P9 — read it back to the customer. Returns 409 if the flight is fully booked; in that case suggest alternatives via search_flights.",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/bookings",
+    "method": "POST",
+    "path_params_schema": [],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "The booking request: which flight to book, who's traveling, and seat preference.",
+      "properties": [
+        {
+          "id": "flight_id",
+          "type": "integer",
+          "value_type": "llm_prompt",
+          "description": "ID of the flight to book (from search_flights results).",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "passenger_name",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Full passenger name as on travel document.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "passenger_email",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Passenger email for booking confirmation.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "seat_preference",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Optional: window, aisle, middle, extra_legroom, or exit_row.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": false
+        }
+      ],
+      "required": false,
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}

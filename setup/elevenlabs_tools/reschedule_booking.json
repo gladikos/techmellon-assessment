@@ -1,0 +1,70 @@
+{
+  "type": "webhook",
+  "name": "reschedule_booking",
+  "description": "Move a booking to a different flight. Use search_flights first to find a candidate, confirm with the customer, then call this. Pass the booking reference and the new flight_id.",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/bookings/{reference}/reschedule",
+    "method": "POST",
+    "path_params_schema": [
+      {
+        "id": "reference",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "The booking reference, format AGX-XXXXX.",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      }
+    ],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "The reschedule request: the new flight to move the booking to.\n",
+      "properties": [
+        {
+          "id": "new_flight_id",
+          "type": "integer",
+          "value_type": "llm_prompt",
+          "description": "ID of the new flight (from search_flights results).",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        }
+      ],
+      "required": false,
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}

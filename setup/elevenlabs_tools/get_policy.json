@@ -1,0 +1,51 @@
+{
+  "type": "webhook",
+  "name": "get_policy",
+  "description": "Look up a specific airline policy. Use this whenever the customer asks about pets, baggage, refunds, cancellations, rescheduling, check-in, flight status, special assistance, special items, or seating policy. Pass the topic name. Returns summary, structured rules, and a full natural-language description.",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "{{BACKEND_URL}}/knowledge/{topic}",
+    "method": "GET",
+    "path_params_schema": [
+      {
+        "id": "topic",
+        "type": "string",
+        "value_type": "llm_prompt",
+        "description": "One of: pets, baggage, special_items, special_assistance, check_in, flight_status, cancellation, rescheduling, seating.",
+        "dynamic_variable": "",
+        "constant_value": "",
+        "enum": null,
+        "is_system_provided": false,
+        "required": false
+      }
+    ],
+    "query_params_schema": [],
+    "request_body_schema": null,
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "ngrok-skip-browser-warning",
+        "value": "true"
+      },
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "content_type": "application/json",
+    "auth_connection": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 20,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}
